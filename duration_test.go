@@ -20,7 +20,7 @@ func TestFromString(t *testing.T) {
 	assert.Equal(t, err, duration.ErrNoMonth)
 
 	// test with good full string
-	dur, err := duration.FromString("P1Y2DT3H4M5S")
+	dur, err := duration.FromString("P1Y0M2DT3H4M5S")
 	assert.Nil(t, err)
 	assert.Equal(t, 1, dur.Years)
 	assert.Equal(t, 2, dur.Days)

@@ -15,8 +15,8 @@ var (
 	// ErrBadFormat is returned when parsing fails
 	ErrBadFormat = errors.New("bad format string")
 
-	// ErrNoMonth is raised when a month is in the format string
-	ErrNoMonth = errors.New("no months allowed")
+	// ErrNoMonth is raised when a month is in the format string unless it has a value of zero
+	ErrNoMonth = errors.New("non-zero value for months is not allowed")
 
 	tmpl = template.Must(template.New("duration").Parse(`P{{if .Years}}{{.Years}}Y{{end}}{{if .Weeks}}{{.Weeks}}W{{end}}{{if .Days}}{{.Days}}D{{end}}{{if .HasTimePart}}T{{end }}{{if .Hours}}{{.Hours}}H{{end}}{{if .Minutes}}{{.Minutes}}M{{end}}{{if .Seconds}}{{.Seconds}}S{{end}}`))
 
@@ -65,7 +65,10 @@ func FromString(dur string) (*Duration, error) {
 		case "year":
 			d.Years = val
 		case "month":
-			return nil, ErrNoMonth
+			// allow month if it's zero
+			if val != 0 {
+				return nil, ErrNoMonth
+			}
 		case "week":
 			d.Weeks = val
 		case "day":
