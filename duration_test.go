@@ -30,6 +30,15 @@ func TestFromString(t *testing.T) {
 	dur, err = FromString("P1W")
 	assert.Nil(t, err)
 	assert.Equal(t, 1, dur.Weeks)
+
+	// test with good float seconds string
+	dur, err = FromString("PT20.410S")
+	assert.Nil(t, err)
+	assert.Equal(t, float32(20.41), dur.Seconds)
+
+	// test with bad float seconds string
+	dur, err = FromString("PT20.S")
+	assert.Equal(t, ErrBadFormat, err)
 }
 
 func TestString(t *testing.T) {

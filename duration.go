@@ -20,7 +20,7 @@ var (
 
 	tmpl = template.Must(template.New("duration").Parse(`P{{if .Years}}{{.Years}}Y{{end}}{{if .Weeks}}{{.Weeks}}W{{end}}{{if .Days}}{{.Days}}D{{end}}{{if .HasTimePart}}T{{end }}{{if .Hours}}{{.Hours}}H{{end}}{{if .Minutes}}{{.Minutes}}M{{end}}{{if .Seconds}}{{.Seconds}}S{{end}}`))
 
-	full = regexp.MustCompile(`P((?P<year>\d+)Y)?((?P<month>\d+)M)?((?P<day>\d+)D)?(T((?P<hour>\d+)H)?((?P<minute>\d+)M)?((?P<second>\d+)S)?)?`)
+	full = regexp.MustCompile(`P((?P<year>\d+)Y)?((?P<month>\d+)M)?((?P<day>\d+)D)?(T((?P<hour>\d+)H)?((?P<minute>\d+)M)?((?P<second>\d+(\.\d+)?)S)?)?`)
 	week = regexp.MustCompile(`P((?P<week>\d+)W)`)
 )
 
@@ -30,7 +30,7 @@ type Duration struct {
 	Days    int
 	Hours   int
 	Minutes int
-	Seconds int
+	Seconds float32
 }
 
 func FromString(dur string) (*Duration, error) {
@@ -57,6 +57,16 @@ func FromString(dur string) (*Duration, error) {
 			continue
 		}
 
+		// float seconds as described in https://www.w3.org/TR/xmlschema11-2/#nt-duSeFrag
+		if name == "second" {
+			val, err := strconv.ParseFloat(part, 32)
+			if err != nil {
+				return nil, ErrBadFormat
+			}
+			d.Seconds = float32(val)
+			continue
+		}
+
 		val, err := strconv.Atoi(part)
 		if err != nil {
 			return nil, err
@@ -74,11 +84,13 @@ func FromString(dur string) (*Duration, error) {
 			d.Hours = val
 		case "minute":
 			d.Minutes = val
-		case "second":
-			d.Seconds = val
 		default:
 			return nil, errors.New(fmt.Sprintf("unknown field %s", name))
 		}
+	}
+
+	if d.String() == "P" {
+		return nil, ErrBadFormat
 	}
 
 	return d, nil
