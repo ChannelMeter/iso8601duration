@@ -85,4 +85,7 @@ func TestToDuration(t *testing.T) {
 
 	d = Duration{Seconds: 1}
 	assert.Equal(t, time.Second, d.ToDuration())
+
+	d = Duration{Seconds: 2.123}
+	assert.Equal(t, time.Duration(2.123*float32(time.Second)), d.ToDuration())
 }

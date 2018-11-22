@@ -127,7 +127,7 @@ func (d *Duration) ToDuration() time.Duration {
 	tot += day * time.Duration(d.Days)
 	tot += time.Hour * time.Duration(d.Hours)
 	tot += time.Minute * time.Duration(d.Minutes)
-	tot += time.Second * time.Duration(d.Seconds)
+	tot += time.Duration(float32(time.Second) * float32(d.Seconds))
 
 	return tot
 }
