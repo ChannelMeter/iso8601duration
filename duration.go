@@ -22,10 +22,12 @@ var (
 
 	full = regexp.MustCompile(`P((?P<year>\d+)Y)?((?P<month>\d+)M)?((?P<day>\d+)D)?(T((?P<hour>\d+)H)?((?P<minute>\d+)M)?((?P<second>\d+)S)?)?`)
 	week = regexp.MustCompile(`P((?P<week>\d+)W)`)
+	month = regexp.MustCompile(`P((?P<month>\d+)M)`)
 )
 
 type Duration struct {
 	Years   int
+	Months  int
 	Weeks   int
 	Days    int
 	Hours   int
@@ -42,6 +44,9 @@ func FromString(dur string) (*Duration, error) {
 	if week.MatchString(dur) {
 		match = week.FindStringSubmatch(dur)
 		re = week
+	} else if month.MatchString(dur) {
+		match = month.FindStringSubmatch(dur)
+		re = month
 	} else if full.MatchString(dur) {
 		match = full.FindStringSubmatch(dur)
 		re = full
@@ -65,7 +70,7 @@ func FromString(dur string) (*Duration, error) {
 		case "year":
 			d.Years = val
 		case "month":
-			return nil, ErrNoMonth
+			d.Months = val
 		case "week":
 			d.Weeks = val
 		case "day":
@@ -111,6 +116,7 @@ func (d *Duration) ToDuration() time.Duration {
 	tot := time.Duration(0)
 
 	tot += year * time.Duration(d.Years)
+	tot += day * 7 * 4 * time.Duration(d.Months)
 	tot += day * 7 * time.Duration(d.Weeks)
 	tot += day * time.Duration(d.Days)
 	tot += time.Hour * time.Duration(d.Hours)
