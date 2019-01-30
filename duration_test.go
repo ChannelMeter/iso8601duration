@@ -1,81 +1,91 @@
-package duration_test
+package duration
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
-
-	duration "github.com/channelmeter/iso8601duration"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestFromString(t *testing.T) {
 	t.Parallel()
 
 	// test with bad format
-	_, err := duration.FromString("asdf")
-	assert.Equal(t, err, duration.ErrBadFormat)
+	_, err := FromString("asdf")
+	assert.Equal(t, ErrBadFormat, err)
 
 	// test with month
-	_, err = duration.FromString("P1M")
-	assert.Equal(t, err, duration.ErrNoMonth)
+	_, err = FromString("P1M")
+	assert.Equal(t, ErrNoMonth, err)
 
 	// test with good full string
-	dur, err := duration.FromString("P1Y2DT3H4M5S")
+	dur, err := FromString("P1Y2DT3H4M5S")
 	assert.Nil(t, err)
 	assert.Equal(t, 1, dur.Years)
 	assert.Equal(t, 2, dur.Days)
 	assert.Equal(t, 3, dur.Hours)
 	assert.Equal(t, 4, dur.Minutes)
-	assert.Equal(t, 5, dur.Seconds)
+	assert.Equal(t, float32(5), dur.Seconds)
 
 	// test with good week string
-	dur, err = duration.FromString("P1W")
+	dur, err = FromString("P1W")
 	assert.Nil(t, err)
 	assert.Equal(t, 1, dur.Weeks)
+
+	// test with good float seconds string
+	dur, err = FromString("PT20.410S")
+	assert.Nil(t, err)
+	assert.Equal(t, float32(20.41), dur.Seconds)
+
+	// test with bad float seconds string
+	dur, err = FromString("PT20.S")
+	assert.Equal(t, ErrBadFormat, err)
 }
 
 func TestString(t *testing.T) {
 	t.Parallel()
 
 	// test empty
-	d := duration.Duration{}
-	assert.Equal(t, d.String(), "P")
+	d := Duration{}
+	assert.Equal(t, "P", d.String())
 
 	// test only larger-than-day
-	d = duration.Duration{Years: 1, Days: 2}
-	assert.Equal(t, d.String(), "P1Y2D")
+	d = Duration{Years: 1, Days: 2}
+	assert.Equal(t, "P1Y2D", d.String())
 
 	// test only smaller-than-day
-	d = duration.Duration{Hours: 1, Minutes: 2, Seconds: 3}
-	assert.Equal(t, d.String(), "PT1H2M3S")
+	d = Duration{Hours: 1, Minutes: 2, Seconds: 3}
+	assert.Equal(t, "PT1H2M3S", d.String())
 
 	// test full format
-	d = duration.Duration{Years: 1, Days: 2, Hours: 3, Minutes: 4, Seconds: 5}
-	assert.Equal(t, d.String(), "P1Y2DT3H4M5S")
+	d = Duration{Years: 1, Days: 2, Hours: 3, Minutes: 4, Seconds: 5}
+	assert.Equal(t, "P1Y2DT3H4M5S", d.String())
 
 	// test week format
-	d = duration.Duration{Weeks: 1}
-	assert.Equal(t, d.String(), "P1W")
+	d = Duration{Weeks: 1}
+	assert.Equal(t, "P1W", d.String())
 }
 
 func TestToDuration(t *testing.T) {
 	t.Parallel()
 
-	d := duration.Duration{Years: 1}
-	assert.Equal(t, d.ToDuration(), time.Hour*24*365)
+	d := Duration{Years: 1}
+	assert.Equal(t, time.Hour*24*365, d.ToDuration())
 
-	d = duration.Duration{Weeks: 1}
-	assert.Equal(t, d.ToDuration(), time.Hour*24*7)
+	d = Duration{Weeks: 1}
+	assert.Equal(t, time.Hour*24*7, d.ToDuration())
 
-	d = duration.Duration{Days: 1}
-	assert.Equal(t, d.ToDuration(), time.Hour*24)
+	d = Duration{Days: 1}
+	assert.Equal(t, time.Hour*24, d.ToDuration())
 
-	d = duration.Duration{Hours: 1}
-	assert.Equal(t, d.ToDuration(), time.Hour)
+	d = Duration{Hours: 1}
+	assert.Equal(t, time.Hour, d.ToDuration())
 
-	d = duration.Duration{Minutes: 1}
-	assert.Equal(t, d.ToDuration(), time.Minute)
+	d = Duration{Minutes: 1}
+	assert.Equal(t, time.Minute, d.ToDuration())
 
-	d = duration.Duration{Seconds: 1}
-	assert.Equal(t, d.ToDuration(), time.Second)
+	d = Duration{Seconds: 1}
+	assert.Equal(t, time.Second, d.ToDuration())
+
+	d = Duration{Seconds: 2.123}
+	assert.Equal(t, time.Duration(2.123*float32(time.Second)), d.ToDuration())
 }
