@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	duration "github.com/channelmeter/iso8601duration"
+	duration "github.com/ChannelMeter/iso8601duration"
 	"github.com/stretchr/testify/assert"
 )
 
