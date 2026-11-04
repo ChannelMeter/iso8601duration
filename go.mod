@@ -1,16 +1,12 @@
 module github.com/spiegel-im-spiegel/iso8601duration
 
-go 1.25
+go 1.26
 
-toolchain go1.26.3
-
-require (
-	github.com/goark/errs v1.3.3
-	github.com/stretchr/testify v1.11.1
-)
+toolchain go1.27.3
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
+	github.com/goark/errs v1.3.4
+	github.com/stretchr/testify v1.12.1
 )
+
+require go.yaml.in/yaml/v3 v3.0.5 // indirect

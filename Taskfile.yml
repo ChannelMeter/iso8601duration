@@ -35,7 +35,9 @@ tasks:
       - '**/*.go'
 
   prepare:
-      - go mod tidy -v -go=1.25
+    desc: Prepare the module by tidying dependencies.
+    cmds:
+      - go mod tidy -v -go=1.26
 
   clean:
     desc: Initialize module and build cache, and remake go.sum file.
